@@ -11,50 +11,80 @@ from __future__ import absolute_import
 
 import octoprint.plugin
 
-class CameraliftPlugin(octoprint.plugin.SettingsPlugin,
-                       octoprint.plugin.TemplatePlugin):
+class CameraliftPlugin(octoprint.plugin.StartupPlugin,
+                       octoprint.plugin.SettingsPlugin,
+                       octoprint.plugin.TemplatePlugin,
+                       octoprint.plugin.EventHandlerPlugin):
 
         #removed octoprint.plugin.AssetPlugin,
 
-	##~~ SettingsPlugin mixin
+    ##~~ StartupPlugin mixin
 
-	def get_settings_defaults(self):
-		return dict(
-			# put your plugin's default settings here
-		)
+    def on_after_startup(self):
+        spm = self._settings.get(['steps_per_mm'])
+        czo = self._settings.get(['camera_z_offset'])
+        self._logger.info("steps per mm: {spm}, camera Z offset: {czo}".format(**locals()))
 
-	##~~ AssetPlugin mixin
+    ##~~ SettingsPlugin mixin
 
-	def QQQQget_assets(self):
-		# Define your plugin's asset files to automatically include in the
-		# core UI here.
-		return dict(
-			js=["js/cameralift.js"],
-			css=["css/cameralift.css"],
-			less=["less/cameralift.less"]
-		)
+    def get_settings_defaults(self):
+        return dict(
+            steps_per_mm = 100,
+            camera_z_offset = 0
+        )
 
-	##~~ Softwareupdate hook
+    def XXget_template_vars(self):
+        return dict(
+            steps_per_mm = self._settings.get(["steps_per_mm"]),
+            camera_z_offset = self._settings.get(["camera_z_offset"])
+        )
+                
+    def get_template_configs(self):
+        return [
+            dict(type="settings", custom_bindings=False)
+        ]
 
-	def get_update_information(self):
-		# Define the configuration for your plugin to use with the Software Update
-		# Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
-		# for details.
-		return dict(
-			cameralift=dict(
-				displayName="Cameralift Plugin",
-				displayVersion=self._plugin_version,
+    ##~~ EventHandler mixin
 
-				# version check: github repository
-				type="github_release",
-				user="phildubach",
-				repo="OctoPrint-CameraLift",
-				current=self._plugin_version,
+    def on_event(self, event, payload):
+        from octoprint.events import Events
+        if event != Events.Z_CHANGE or not payload or not payload.get("new", False):
+            return
+        self._logger.info("got z change event")
+        self._logger.info(payload)
 
-				# update method: pip
-				pip="https://github.com/phildubach/OctoPrint-CameraLift/archive/{target_version}.zip"
-			)
-		)
+    ##~~ AssetPlugin mixin
+
+    def QQQQget_assets(self):
+        # Define your plugin's asset files to automatically include in the
+        # core UI here.
+        return dict(
+            js=["js/cameralift.js"],
+            css=["css/cameralift.css"],
+            less=["less/cameralift.less"]
+        )
+
+    ##~~ Softwareupdate hook
+
+    def get_update_information(self):
+        # Define the configuration for your plugin to use with the Software Update
+        # Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
+        # for details.
+        return dict(
+            cameralift=dict(
+                displayName="Cameralift Plugin",
+                displayVersion=self._plugin_version,
+
+                # version check: github repository
+                type="github_release",
+                user="phildubach",
+                repo="OctoPrint-CameraLift",
+                current=self._plugin_version,
+
+                # update method: pip
+                pip="https://github.com/phildubach/OctoPrint-CameraLift/archive/{target_version}.zip"
+            )
+        )
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
@@ -63,11 +93,11 @@ class CameraliftPlugin(octoprint.plugin.SettingsPlugin,
 __plugin_name__ = "Cameralift Plugin"
 
 def __plugin_load__():
-	global __plugin_implementation__
-	__plugin_implementation__ = CameraliftPlugin()
+    global __plugin_implementation__
+    __plugin_implementation__ = CameraliftPlugin()
 
-	global __plugin_hooks__
-	__plugin_hooks__ = {
-		"octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
-	}
+    global __plugin_hooks__
+    __plugin_hooks__ = {
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
+    }
 

@@ -1,0 +1,28 @@
+<form class="form-horizontal">
+    <div class="control-group">
+        <label class="control-label">{{ _('Resolution') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-mini text-right" data-bind="value: settings.plugins.cameralift.steps_per_mm" />
+                <span class="add-on">steps/mm</span>
+            </div>
+            <span class="help-block">{{ _('The number of steps required to lift the camera by 1 millimeter') }}</span>
+        </div>
+        <label class="control-label">{{ _('Z Offset') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-mini text-right" data-bind="value: settings.plugins.cameralift.camera_z_offset" />
+                <span class="add-on">mm</span>
+            </div>
+            <span class="help-block">{{ _('The Z offset of the camera, i.e. position of the camera when the nozzle is at 0mm') }}</span>
+        </div>
+        <label class="control-label">{{ _('Endstop position') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-mini text-right" data-bind="value: settings.plugins.cameralift.camera_z_offset" />
+                <span class="add-on">mm</span>
+            </div>
+            <span class="help-block">{{ _('The Z offset of the camera, i.e. position of the camera when the nozzle is at 0mm') }}</span>
+        </div>
+    </div>
+</form>
